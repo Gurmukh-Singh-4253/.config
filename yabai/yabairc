@@ -1,0 +1,26 @@
+# bsp or float (default: float)
+yabai -m config layout bsp
+
+# New window spawns to the left if vertical split, or top if horizontal split
+yabai -m config window_placement second-child
+
+# Set all padding and gaps to 20pt (default: 0)
+yabai -m config top_padding    55
+yabai -m config bottom_padding 5
+yabai -m config left_padding   5
+yabai -m config right_padding  5
+yabai -m config window_gap     5
+
+# on or off (default: off)
+yabai -m config auto_balance on
+
+# set focus follows mouse mode (default: off, options: off, autoraise, autofocus)
+yabai -m config focus_follows_mouse autoraise
+
+# set up mouse modifier and other shit
+yabai -m config mouse_modifier cmd
+yabai -m config mouse_action1 move
+yabai -m config mouse_action2 resize
+
+# turn off shadows and turn off animations
+yabai -m config window_shadow off

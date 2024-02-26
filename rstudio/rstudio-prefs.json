@@ -1,0 +1,9 @@
+{
+    "source_with_echo": true,
+    "initial_working_directory": "~",
+    "editor_theme": "Cobalt",
+    "posix_terminal_shell": "bash",
+    "global_theme": "alternate",
+    "text_rendering": "geometricPrecision",
+    "font_size_points": 12
+}

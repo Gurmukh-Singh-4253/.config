@@ -1,0 +1,333 @@
+source "$HOME/.config/colors.sh"
+source "$HOME/.config/icons.sh"
+
+PLUGIN_DIR="$HOME/.config/sketchybar/plugins"
+
+##### Bar Appearance #####
+# Configuring the general appearance of the bar, these are only some of the
+# options available. For all options see:
+# https://felixkratz.github.io/SketchyBar/config/bar
+# If you are looking for other colors, see the color picker:
+# https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
+
+sketchybar --bar color=0x00000000 \
+                 height=56        \
+                 margin=0         \
+                 y_offset=0       \
+                 padding_left=8   \
+                 padding_right=8
+
+##### Changing Defaults #####
+# We now change some default values that are applied to all further items
+# For a full list of all available item properties see:
+# https://felixkratz.github.io/SketchyBar/config/items
+
+sketchybar --default padding_left=8                                    \
+                     padding_right=8                                   \
+                                                                       \
+                     background.border_color=$COLOR_YELLOW             \
+                     background.border_width=2                         \
+                     background.height=40                              \
+                     background.corner_radius=12                       \
+                                                                       \
+                     icon.color=$COLOR_YELLOW                          \
+                     icon.highlight_color=$COLOR_BACKGROUND            \
+                     icon.padding_left=6                               \
+                     icon.padding_right=2                              \
+                     icon.font="CaskaydiaCove Nerd Font:Regular:16.0"  \
+                                                                       \
+                     label.color=$COLOR_YELLOW                         \
+                     label.highlight_color=$COLOR_BACKGROUND           \
+                     label.padding_left=2                              \
+                     label.padding_right=6                             \
+                     label.font="CaskaydiaCove Nerd Font:Regular:12.0"
+
+##### Adding Menu #####
+
+sketchybar --add item command.logo left                                                                     \
+           --set      command.logo background.color=$COLOR_GREEN                                            \
+                                   background.border_width=0                                                \
+                                   background.corner_radius=6                                               \
+                                   background.height=24                                                     \
+                                   icon=$ICON_CMD                                                           \
+                                   icon.highlight=on                                                        \
+                                   icon.padding_left=4                                                      \
+                                   icon.padding_right=4                                                     \
+                                   label.drawing=off                                                        \
+                                   click_script="sketchybar -m --set \$NAME popup.drawing=toggle"           \
+                                   popup.height=32                                                          \
+                                   popup.background.color=$COLOR_BACKGROUND                                 \
+                                   popup.background.border_width=2                                          \
+                                   popup.background.corner_radius=12                                        \
+                                   popup.background.border_color=$COLOR_GREEN                               \
+                                                                                                            \
+           --add item command.preferences popup.command.logo                                                \
+           --set      command.preferences icon=$ICON_COG                                                    \
+                                          icon.color=$COLOR_GREEN                                           \
+                                          icon.padding_left=4                                               \
+                                          icon.padding_right=2                                              \
+                                          label="Settings"                                                  \
+                                          label.color=$COLOR_GREEN                                          \
+                                          label.padding_left=2                                              \
+                                          label.padding_right=4                                             \
+                                          click_script="open -a 'System Preferences';                    
+                                                        sketchybar -m --set command.logo popup.drawing=off" \
+           --add item command.activity popup.command.logo                                                   \
+           --set      command.activity icon=$ICON_CHART                                                     \
+                                       icon.color=$COLOR_GREEN                                              \
+                                       icon.padding_left=4                                                  \
+                                       icon.padding_right=2                                                 \
+                                       label="Task Manager"                                                 \
+                                       label.color=$COLOR_GREEN                                             \
+                                       label.padding_left=2                                                 \
+                                       label.padding_right=4                                                \
+                                       click_script="open -a 'Activity Monitor';                       
+                                                     sketchybar -m --set command.logo popup.drawing=off"    \
+           --add item command.lock popup.command.logo                                                       \
+           --set      command.lock icon=$ICON_LOCK                                                          \
+                                   icon.color=$COLOR_GREEN                                                  \
+                                   icon.padding_left=4                                                      \
+                                   icon.padding_right=2                                                     \
+                                   label="Sleep"                                                            \
+                                   label.color=$COLOR_GREEN                                                 \
+                                   label.padding_left=2                                                     \
+                                   label.padding_right=4                                                    \
+                                   click_script="pmset displaysleepnow;                           
+                                                 sketchybar -m --set command.logo popup.drawing=off"
+
+sketchybar --add bracket cmd command.logo                         \
+           --set         cmd background.color=$COLOR_BACKGROUND   \
+                             background.border_color=$COLOR_GREEN
+
+sketchybar --add item seperator.l1 left                   \
+           --set      seperator.l1 padding_left=4         \
+                                   padding_right=4        \
+                                   background.drawing=off \
+                                   icon.drawing=off       \
+                                   label.drawing=off
+
+##### Adding Mission Control Space Indicators #####
+# Now we add some mission control spaces:
+# https://felixkratz.github.io/SketchyBar/config/components#space----associate-mission-control-spaces-with-an-item
+# to indicate active and available mission control spaces
+
+sketchybar --add event window_change
+
+COLORS_SPACE=($COLOR_YELLOW $COLOR_CYAN $COLOR_MAGENTA $COLOR_WHITE $COLOR_BLUE $COLOR_RED $COLOR_GREEN)
+LENGTH=${#ICONS_SPACE[@]}
+
+for i in "${!ICONS_SPACE[@]}"
+do
+  sid=$(($i+1))
+  PAD_LEFT=2
+  PAD_RIGHT=2
+  if [[ $i == 0 ]]; then
+    PAD_LEFT=8
+  elif [[ $i == $(($LENGTH-1)) ]]; then
+    PAD_RIGHT=8
+  fi
+  sketchybar --add space space.$sid left                                       \
+             --set       space.$sid script="$PLUGIN_DIR/app_space.sh"          \
+                                    associated_space=$sid                      \
+                                    padding_left=$PAD_LEFT                     \
+                                    padding_right=$PAD_RIGHT                   \
+                                    background.color=${COLORS_SPACE[i]}        \
+                                    background.border_width=0                  \
+                                    background.corner_radius=6                 \
+                                    background.height=24                       \
+                                    icon=${ICONS_SPACE[i]}                     \
+                                    icon.color=${COLORS_SPACE[i]}              \
+                                    label="_"                                  \
+                                    label.color=${COLORS_SPACE[i]}             \
+             --subscribe space.$sid front_app_switched window_change
+done
+
+sketchybar --add bracket spaces '/space\..*/'                      \
+           --set         spaces background.color=$COLOR_BACKGROUND
+
+sketchybar --add item seperator.l2 left                   \
+           --set      seperator.l2 padding_left=4         \
+                                   padding_right=4        \
+                                   background.drawing=off \
+                                   icon.drawing=off       \
+                                   label.drawing=off
+
+##### Adding Left Items #####
+# We add some regular items to the left side of the bar
+# only the properties deviating from the current defaults need to be set
+
+sketchybar --add item slack left                                     \
+           --set      slack script="$PLUGIN_DIR/noti_slack.sh"       \
+                           update_freq=60                            \
+                           padding_left=8                            \
+                           padding_right=2                           \
+                           background.border_width=0                 \
+                           background.height=24                      \
+                           icon=$ICON_CHAT                           \
+                           icon.color=$COLOR_WHITE                   \
+                           label.color=$COLOR_WHITE                  \
+                                                                     \
+           --add item mail left                                      \
+           --set      mail script="$PLUGIN_DIR/noti_mail.sh"         \
+                           update_freq=60                            \
+                           padding_left=2                            \
+                           padding_right=2                           \
+                           background.border_width=0                 \
+                           background.height=24                      \
+                           icon=$ICON_MAIL                           \
+                           icon.color=$COLOR_BLUE                    \
+                           label.color=$COLOR_BLUE                   \
+                                                                     \
+           --add item taskwarrior left                               \
+           --set      taskwarrior script="$PLUGIN_DIR/noti_task.sh"  \
+                                  update_freq=120                    \
+                                  padding_left=2                     \
+                                  padding_right=2                    \
+                                  background.border_width=0          \
+                                  background.height=24               \
+                                  icon=$ICON_LIST                    \
+                                  icon.color=$COLOR_CYAN             \
+                                  label.color=$COLOR_CYAN            \
+                                                                     \
+           --add item timewarrior left                               \
+           --set      timewarrior script="$PLUGIN_DIR/noti_timew.sh" \
+                                  update_freq=120                    \
+                                  padding_left=2                     \
+                                  padding_right=8                    \
+                                  background.border_width=0          \
+                                  background.height=24               \
+                                  icon=$ICON_CLOCK                   \
+                                  icon.color=$COLOR_YELLOW           \
+                                  label.color=$COLOR_YELLOW
+
+sketchybar --add bracket notifications slack mail taskwarrior timewarrior  \
+           --set         notifications background.color=$COLOR_BACKGROUND  \
+                                       background.border_color=$COLOR_CYAN
+
+##### Adding Right Items #####
+# In the same way as the left items we can add items to the right side.
+# Additional position (e.g. center) are available, see:
+# https://felixkratz.github.io/SketchyBar/config/items#adding-items-to-sketchybar
+
+# Some items refresh on a fixed cycle, e.g. the clock runs its script once
+# every 10s. Other items respond to events they subscribe to, e.g. the
+# volume.sh script is only executed once an actual change in system audio
+# volume is registered. More info about the event system can be found here:
+# https://felixkratz.github.io/SketchyBar/config/events
+
+sketchybar --add item time right                        \
+           --set      time script="$PLUGIN_DIR/time.sh" \
+                           update_freq=5                \
+                           padding_left=2               \
+                           padding_right=8              \
+                           background.color=$COLOR_RED  \
+                           background.border_width=0    \
+                           background.corner_radius=6   \
+                           background.height=24         \
+                           icon=$ICON_CLOCK             \
+                           icon.highlight=on            \
+                           label.highlight=on           \
+           --add item date right                        \
+           --set      date script="$PLUGIN_DIR/date.sh" \
+                           update_freq=60               \
+                           padding_left=8               \
+                           padding_right=2              \
+                           background.border_width=0    \
+                           background.height=24         \
+                           icon=$ICON_CALENDAR          \
+                           icon.color=$COLOR_RED        \
+                           label.color=$COLOR_RED
+
+sketchybar --add bracket clock time date                          \
+           --set         clock background.color=$COLOR_BACKGROUND \
+                               background.border_color=$COLOR_RED
+
+
+sketchybar --add item seperator.r1 right                  \
+           --set      seperator.r1 padding_left=4         \
+                                   padding_right=4        \
+                                   background.drawing=off \
+                                   icon.drawing=off       \
+                                   label.drawing=off
+
+sketchybar --add item  volume right                                  \
+           --set       volume script="$PLUGIN_DIR/volume.sh"         \
+                              padding_left=2                         \
+                              padding_right=8                        \
+                              background.border_width=0              \
+                              background.height=24                   \
+           --subscribe volume system_woke volume_change              \
+                                                                     \
+           --add item  battery right                                 \
+           --set       battery script="$PLUGIN_DIR/battery.sh"       \
+                               update_freq=120                       \
+                               padding_left=8                        \
+                               padding_right=2                       \
+                               background.border_width=0             \
+                               background.height=24                  \
+           --subscribe battery system_woke power_source_change
+
+sketchybar --add bracket status volume battery                      \
+           --set         status background.color=$COLOR_BACKGROUND  \
+                                background.border_color=$COLOR_BLUE
+
+sketchybar --add item seperator.r2 right                  \
+           --set      seperator.r2 padding_left=4         \
+                                   padding_right=4        \
+                                   background.drawing=off \
+                                   icon.drawing=off       \
+                                   label.drawing=off
+
+sketchybar --add item swap right                        \
+           --set      swap script="$PLUGIN_DIR/swap.sh" \
+                           update_freq=60               \
+                           padding_left=2               \
+                           padding_right=8              \
+                           background.border_width=0    \
+                           background.height=24         \
+                           icon=$ICON_SWAP              \
+                           icon.color=$COLOR_CYAN       \
+                           label.color=$COLOR_CYAN      \
+                                                        \
+           --add item ram right                         \
+           --set      ram script="$PLUGIN_DIR/ram.sh"   \
+                          update_freq=60                \
+                          padding_left=2                \
+                          padding_right=2               \
+                          background.border_width=0     \
+                          background.height=24          \
+                          icon=$ICON_RAM                \
+                          icon.color=$COLOR_GREEN       \
+                          label.color=$COLOR_GREEN      \
+                                                        \
+           --add item disk right                        \
+           --set      disk script="$PLUGIN_DIR/disk.sh" \
+                           update_freq=60               \
+                           padding_left=2               \
+                           padding_right=2              \
+                           background.border_width=0    \
+                           background.height=24         \
+                           icon=$ICON_DISK              \
+                           icon.color=$COLOR_YELLOW     \
+                           label.color=$COLOR_YELLOW    \
+                                                        \
+           --add item cpu right                         \
+           --set      cpu script="$PLUGIN_DIR/cpu.sh"   \
+                          update_freq=60                \
+                          padding_left=8                \
+                          padding_right=2               \
+                          background.border_width=0     \
+                          background.height=24          \
+                          icon=$ICON_CPU                \
+                          icon.color=$COLOR_RED         \
+                          label.color=$COLOR_RED
+
+sketchybar --add bracket activity swap ram disk cpu                      \
+           --set         activity background.color=$COLOR_BACKGROUND     \
+                                  background.border_color=$COLOR_MAGENTA
+
+##### Finalizing Setup #####
+# The below command is only needed at the end of the initial configuration to
+# force all scripts to run the first time, it should never be run in an item script.
+
+sketchybar --update
